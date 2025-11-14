@@ -90,3 +90,14 @@ npx prisma migrate dev
 
 npm run start:dev
 
+
+
+\### Front-end
+
+```bash
+
+cd pdv-frontend
+
+npm install
+
+npm run dev
