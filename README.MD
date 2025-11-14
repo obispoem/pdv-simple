@@ -81,23 +81,17 @@ Sistema completo de ponto de vendas desenvolvido com NestJS (back-end) e React (
 ```bash
 
 cd pdv-backend
-
 npm install
-
 npx prisma generate
-
 npx prisma migrate dev
-
 npm run start:dev
-
-
+```
 
 \### Front-end
 
 ```bash
 
 cd pdv-frontend
-
 npm install
-
 npm run dev
+```
