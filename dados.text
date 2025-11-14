@@ -1,0 +1,5 @@
+docker run 
+--name pdv-postgres 
+-e POSTGRES_PASSWORD=dockerPostgres
+-p 5432:5432 
+-d postgres

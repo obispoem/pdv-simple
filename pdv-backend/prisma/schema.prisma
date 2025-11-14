@@ -1,0 +1,87 @@
+// criando o schema do Prisma para o sistema PDV
+
+// criando o cliente do Prisma
+generator client {
+  provider = "prisma-client-js" // usando o cliente JavaScript/TypeScript
+}
+
+// conectando ao banco de dados PostgreSQL
+datasource db {
+  provider = "postgresql" // usando PostgreSQL
+  url      = env("DATABASE_URL") // sua conexão com o PostgreSQL
+}
+
+model Product {
+  id    Int      @id @default(autoincrement())
+  name  String
+  price Decimal
+  cost  Decimal?
+  stock Int      @default(0)
+
+  // relacionamento opcional com Category
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId Int?
+
+  // relacionamento com SaleItem
+  items SaleItem[] // lista de itens de venda associados a este produto
+
+  // boa pratica, nao deletar do banco, apenas marcar como inativo
+  isActive Boolean @default(true)
+
+  // nome da tabela no banco
+  @@map("products")
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[] //relacionamento com produtos
+
+  // nome da tabela no banco
+  @@map("categories")
+}
+
+model Sale {
+  id            Int      @id @default(autoincrement())
+  total         Decimal
+  createdAt     DateTime @default(now())
+  paymentMethod String   @default("dinheiro")
+
+  // relacionamento crucial para o PDV
+  items SaleItem[] // lista de itens vendidos nesta venda
+
+  // futuro campo: paymentMethod String?
+  // futuro campo: userId Int?
+
+  // nome da tabela no banco
+  @@map("sales")
+}
+
+// Tabela de junção com dados extras. Crucial para o PDV.
+model SaleItem {
+  id       Int     @id @default(autoincrement())
+  quantity Int // Quantidade vendida (ex: 2)
+  price    Decimal // Preço do produto NA HORA DA VENDA (ex: 5.50)
+
+  // Relacionamentos: O item pertence a uma Venda e a um Produto
+  sale   Sale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  saleId Int
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+
+  @@map("sale_items")
+}
+
+model CashierOperation {
+  id         Int       @id @default(autoincrement())
+  type       String // 'open' ou 'close'
+  amount     Decimal // Valor do saldo (inicial ou final)
+  balance    Decimal? // Saldo calculado do sistema (apenas no fechamento)
+  difference Decimal? // Diferença entre real e sistema
+  createdAt  DateTime  @default(now())
+  openedAt   DateTime? // Data/hora de abertura (usado no fechamento)
+  closedAt   DateTime? // Data/hora de fechamento
+
+  @@map("cashier_operations")
+}
